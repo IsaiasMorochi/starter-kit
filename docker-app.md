@@ -1,6 +1,7 @@
 Docker
 Add a Dockerfile to the project root:
 
+```
 # base image
 FROM node:alpine
 
@@ -25,16 +26,19 @@ COPY . /app
 
 # start app
 CMD ng serve --host 0.0.0.0
-
+```
 
 
 ## Build and tag the Docker image:
 
+```console
 $ docker build -t example:dev .
 $ docker run -d -v ${PWD}:/app -v /app/node_modules -p 4201:4200 --name foo --rm example:dev
+```
 
 ## src/karma.conf.js:
 
+```javascript
 module.exports = function (config) {
   config.set({
     basePath: '',
@@ -77,10 +81,11 @@ module.exports = function (config) {
     restartOnFileChange: true
   });
 };
-
+```
 
 ## e2e/protractor.conf.js:
 
+```javascript
 const { SpecReporter } = require('jasmine-spec-reporter');
 
 exports.config = {
@@ -114,15 +119,23 @@ exports.config = {
     jasmine.getEnv().addReporter(new SpecReporter({ spec: { displayStacktrace: true } }));
   }
 };
-Run the unit and e2e tests:
+```
 
+## Run the unit and e2e tests:
+
+```console
 $ docker exec -it foo ng test --watch=false
 $ docker exec -it foo ng e2e --port 4202
+```
 
 ## Stop the container once done:
+```console
 $ docker stop foo
+```
 
-## Docker compose
+## Docker compose > docker-compose.yml
+
+```yml
 version: '3.7'
 
 services:
@@ -137,22 +150,30 @@ services:
       - '/app/node_modules'
     ports:
       - '4201:4200'
+```
 
 ## Build the image and fire up the container:
+```console
 $ docker-compose up -d --build
+```
 
+Ensure the app is running in the browser and test hot-reloading again. Try both the unit and e2e tests as well:
+```console
 $ docker-compose exec example ng test --watch=false
 $ docker-compose exec example ng e2e --port 4202
+```
 
 ## Stop the container before moving on:
+```console
 $ docker-compose stop
-
+```
 
 
 
 # Production
-### Let’s create a separate Dockerfile for use in production called Dockerfile-prod:
+### Letâ€™s create a separate Dockerfile for use in production called Dockerfile-prod:
 
+```yml
 #############
 ### build ###
 #############
@@ -201,14 +222,20 @@ EXPOSE 80
 
 # run nginx
 CMD ["nginx", "-g", "daemon off;"]
+```
 
 ## Using the production Dockerfile, build and tag the Docker image:
+```console
 $ docker build -f Dockerfile-prod -t example:prod .
+```
 
 ## Spin up the container:
+```console
 $ docker run -it -p 80:80 --rm example:prod
+```
 
 ## Docker-compose > docker-compose-prod.yml
+```yml
 version: '3.7'
 
 services:
@@ -220,7 +247,9 @@ services:
       dockerfile: Dockerfile-prod
     ports:
       - '80:80'
+```
 
 Fire up the container:
-
+```console
 $ docker-compose -f docker-compose-prod.yml up -d --build
+```
